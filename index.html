@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style>
+body {
+  background-color: #0b0e1a;
+  color: #ffd27d;
+  font-size: 30px;
+  padding: 40px;
+}
+
+/* 蝋燭の見た目 */
+.candle {
+  display: inline-block;
+  width: 10px;
+  height: 20px;
+  margin: 6px;
+  border-radius: 50% 50% 60% 60%;
+  animation-name: flicker, breathe;
+  animation-iteration-count: infinite;
+}
+
+/* 揺らぎ */
+@keyframes flicker {
+  0%   { transform: scale(1) translateY(0); opacity: 0.9; }
+  50%  { transform: scale(0.9) translateY(1px); opacity: 0.7; }
+  100% { transform: scale(1) translateY(0); opacity: 0.9; }
+}
+
+/* 呼吸 */
+@keyframes breathe {
+  0%   { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
+  50%  { box-shadow: 0 0 14px rgba(255,180,80,0.9); }
+  100% { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
+}
+</style>
+</head>
+
+<body>
+
+<button onclick="imHere()">おる</button>
+
+<div id="dots"></div>
+
+<script>
+/* 「おる」状態を覚える */
+function imHere() {
+  sessionStorage.setItem("imHere", "yes");
+  drawDots();
+}
+
+/* 夜の時間帯で気配を変える */
+function getNightMood() {
+  let hour = new Date().getHours();
+
+  if (hour >= 0 && hour < 3) {
+    return { color: "#ff9b5a", speed: 2.8 };
+  }
+  if (hour >= 3 && hour < 5) {
+    return { color: "#ffb347", speed: 3.8 };
+  }
+  if (hour >= 5 && hour < 6) {
+    return { color: "#ffe2a8", speed: 5 };
+  }
+  return { color: "#ff8c00", speed: 1.8 };
+}
+
+/* 蝋燭を描く */
+function drawDots() {
+  let container = document.getElementById("dots");
+  container.innerHTML = "";
+
+  if (!sessionStorage.getItem("imHere")) return;
+
+  let mood = getNightMood();
+
+  let d = document.createElement("div");
+  d.className = "candle";
+  d.style.background =
+    `radial-gradient(circle at 50% 20%, #fff, ${mood.color})`;
+  d.style.animationDuration =
+    `${mood.speed}s, ${4 + Math.random() * 2}s`;
+  d.style.animationDelay =
+    `${-Math.random() * mood.speed}s, 0s`;
+  d.style.opacity = 0.6 + Math.random() * 0.4;
+
+  container.appendChild(d);
+}
+
+/* 画面開いた時、前に「おった」なら灯す */
+drawDots();
+
+/* 去ったら消える */
+window.addEventListener("beforeunload", () => {
+  sessionStorage.removeItem("imHere");
+});
+</script>
+
+</body>
+</html>
