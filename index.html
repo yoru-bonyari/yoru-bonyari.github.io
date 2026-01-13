@@ -80,8 +80,7 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
 /* ===== おる ===== */
-var myId = Date.now() + "_" + Math.random();
-var myRef = db.ref("presence/users/" + myId);
+var myRef = db.ref("presence/users").push();
 
 function imHere() {
   myRef.set(true);
