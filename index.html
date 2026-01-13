@@ -102,14 +102,6 @@ db.ref("presence/count").on("value", function(snapshot){
   var num = snapshot.val() || 0;
   var box = document.getElementById("dots");
   box.innerHTML = "";
-  for (var i=0; i<num; i++) {
-    var d = document.createElement("div");
-    d.className = "candle";
-    box.appendChild(d);
-  }
-});
-
-/* ===== 個体差 ===== */
 for (var i=0; i<num; i++) {
   var d = document.createElement("div");
   d.className = "candle";
@@ -120,6 +112,7 @@ for (var i=0; i<num; i++) {
 
   box.appendChild(d);
 }
+});
 
 </script>
 
