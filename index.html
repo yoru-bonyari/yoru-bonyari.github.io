@@ -36,6 +36,10 @@ body {
   100% { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
 }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 </head>
 
 <body>
@@ -44,10 +48,37 @@ body {
 
 <div id="dots"></div>
 
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
+    authDomain: "yoru-no-akari.firebaseapp.com",
+    databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
+    projectId: "yoru-no-akari",
+    storageBucket: "yoru-no-akari.firebasestorage.app",
+    messagingSenderId: "365296381564",
+    appId: "1:365296381564:web:3f990dfb5b29b25405e3f9",
+    measurementId: "G-KPNRGKHYJM"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 <script>
+
 /* 「おる」状態を覚える */
 function imHere() {
   sessionStorage.setItem("imHere", "yes");
+  db.ref("presence/count").transaction(n => (n || 0) + 1);
   drawDots();
 }
 
@@ -90,11 +121,26 @@ function drawDots() {
 }
 
 /* 画面開いた時、前に「おった」なら灯す */
-drawDots();
+drawDots() {
+db.ref("presence/count").on("value", snapshot => {
+  let num = snapshot.val() || 0;
+  let container = document.getElementById("dots");
+  container.innerHTML = "";
+
+  for (let i = 0; i < num; i++) {
+    let d = document.createElement("div");
+    d.className = "candle";
+    container.appendChild(d);
+  }
+});
+
 
 /* 去ったら消える */
 window.addEventListener("beforeunload", () => {
-  sessionStorage.removeItem("imHere");
+  if (sessionStorage.getItem("imHere")) {
+    db.ref("presence/count").transaction(n => Math.max((n || 1) - 1, 0));
+    sessionStorage.removeItem("imHere");
+  }
 });
 </script>
 
