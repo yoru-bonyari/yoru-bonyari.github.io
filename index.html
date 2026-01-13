@@ -51,21 +51,6 @@ body {
 <div id="dots"></div>
 
 <script>
-/* ★★★ ここを自分のFirebase設定に置き換える ★★★ */
-var firebaseConfig = {
-    apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
-    authDomain: "yoru-no-akari.firebaseapp.com",
-    databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
-    projectId: "yoru-no-akari",
-    storageBucket: "yoru-no-akari.firebasestorage.app",
-    messagingSenderId: "365296381564",
-    appId: "1:365296381564:web:3f990dfb5b29b25405e3f9",
-    measurementId: "G-KPNRGKHYJM"
-};
-
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
-
 /* 夜の時間の気配 */
 function getNightMood() {
   let h = new Date().getHours();
