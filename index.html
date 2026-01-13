@@ -10,38 +10,44 @@
 
 <style>
 body {
-  background:#0b0e1a;
-  color:#ffd27d;
-  font-size:24px;
-  padding:40px;
+  background-color: #0b0e1a;
+  color: #ffd27d;
+  font-size: 28px;
+  padding: 40px;
 }
 
-button {
-  font-size:20px;
-  padding:10px 20px;
-  margin-bottom:20px;
-}
-
+/* 蝋燭 */
 .candle {
-  display:inline-block;
-  width:10px;
-  height:20px;
-  margin:6px;
-  border-radius:50% 50% 60% 60%;
-  background:radial-gradient(circle at 50% 20%, #fff, #ff9b5a);
-  animation:flicker 2s infinite;
+  display: inline-block;
+  width: 10px;
+  height: 20px;
+  margin: 6px;
+  border-radius: 50% 50% 60% 60%;
+  animation-name: flicker, breathe;
+  animation-iteration-count: infinite;
 }
 
+/* 揺れ */
 @keyframes flicker {
-  0% { opacity:0.8; transform:translateY(0); }
-  50% { opacity:0.5; transform:translateY(1px); }
-  100% { opacity:0.8; transform:translateY(0); }
+  0%   { transform: scale(1) translateY(0); opacity: 0.9; }
+  50%  { transform: scale(0.9) translateY(1px); opacity: 0.7; }
+  100% { transform: scale(1) translateY(0); opacity: 0.9; }
+}
+
+/* 呼吸 */
+@keyframes breathe {
+  0%   { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
+  50%  { box-shadow: 0 0 14px rgba(255,180,80,0.9); }
+  100% { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
 }
 </style>
+
 </head>
 
 <body>
-  
+
+<h2>今、ここに灯っとる気配</h2>
+
 <div id="dots"></div>
 
 <script>
@@ -69,7 +75,7 @@ function imHere() {
     return (n || 0) + 1;
   });
 }
-  
+
 /* ===== 去る ===== */
 window.addEventListener("beforeunload", function(){
   if (sessionStorage.getItem("imHere")) {
@@ -90,7 +96,6 @@ db.ref("presence/count").on("value", function(snapshot){
     box.appendChild(d);
   }
 });
-  
 </script>
 
 <button onclick="imHere()">おる</button>
