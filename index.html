@@ -46,10 +46,6 @@ body {
 
 <body>
 
-<button onclick="imHere()">おる</button>
-
-<div id="dots"></div>
-
 <script type="module">
 
 firebase.initializeApp(firebaseConfig);
@@ -124,6 +120,10 @@ db.ref("presence/count").on("value", snap => {
   }
 });
 </script>
+
+<button onclick="imHere()">おる</button>
+
+<div id="dots"></div>
 
 </body>
 </html>
