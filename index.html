@@ -74,6 +74,9 @@ body {
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
 
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
 /* 夜の時間の気配 */
 function getNightMood() {
   let h = new Date().getHours();
