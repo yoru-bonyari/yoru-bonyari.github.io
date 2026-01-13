@@ -1,129 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
-
 <title>夜のあかり</title>
 
-<!-- Firebase（v8） -->
+<!-- Firebase v8 -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
 body {
-  background-color: #0b0e1a;
-  color: #ffd27d;
-  font-size: 28px;
-  padding: 40px;
+  background:#0b0e1a;
+  color:#ffd27d;
+  font-size:24px;
+  padding:40px;
 }
 
-/* 蝋燭 */
+button {
+  font-size:20px;
+  padding:10px 20px;
+  margin-bottom:20px;
+}
+
 .candle {
-  display: inline-block;
-  width: 10px;
-  height: 20px;
-  margin: 6px;
-  border-radius: 50% 50% 60% 60%;
-  animation-name: flicker, breathe;
-  animation-iteration-count: infinite;
+  display:inline-block;
+  width:10px;
+  height:20px;
+  margin:6px;
+  border-radius:50% 50% 60% 60%;
+  background:radial-gradient(circle at 50% 20%, #fff, #ff9b5a);
+  animation:flicker 2s infinite;
 }
 
-/* 揺れ */
 @keyframes flicker {
-  0%   { transform: scale(1) translateY(0); opacity: 0.9; }
-  50%  { transform: scale(0.9) translateY(1px); opacity: 0.7; }
-  100% { transform: scale(1) translateY(0); opacity: 0.9; }
-}
-
-/* 呼吸 */
-@keyframes breathe {
-  0%   { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
-  50%  { box-shadow: 0 0 14px rgba(255,180,80,0.9); }
-  100% { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
+  0% { opacity:0.8; transform:translateY(0); }
+  50% { opacity:0.5; transform:translateY(1px); }
+  100% { opacity:0.8; transform:translateY(0); }
 }
 </style>
 </head>
 
 <body>
 
-<script type="module">
+<h2>今、ここに灯っとる気配</h2>
 
+<div id="dots"></div>
+
+<script>
+/* ===== Firebase設定（必ず自分のに置き換え） ===== */
+var firebaseConfig = {
+  apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
+  authDomain: "yoru-no-akari.firebaseapp.com",
+  databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
+  projectId: "yoru-no-akari",
+  storageBucket: "yoru-no-akari.firebasestorage.app",
+  messagingSenderId: "365296381564",
+  appId: "1:365296381564:web:3f990dfb5b29b25405e3f9",
+  measurementId: "G-KPNRGKHYJM"
+};
+
+/* ===== 初期化 ===== */
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
-    authDomain: "yoru-no-akari.firebaseapp.com",
-    databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
-    projectId: "yoru-no-akari",
-    storageBucket: "yoru-no-akari.firebasestorage.app",
-    messagingSenderId: "365296381564",
-    appId: "1:365296381564:web:3f990dfb5b29b25405e3f9",
-    measurementId: "G-KPNRGKHYJM"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
-/* 夜の時間の気配 */
-function getNightMood() {
-  let h = new Date().getHours();
-  if (h >= 0 && h < 3) return { color:"#ff9b5a", speed:2.8 };
-  if (h >= 3 && h < 5) return { color:"#ffb347", speed:3.8 };
-  if (h >= 5 && h < 6) return { color:"#ffe2a8", speed:5 };
-  return { color:"#ff8c00", speed:1.8 };
-}
-
-/* おる */
+/* ===== おる ===== */
 function imHere() {
   if (sessionStorage.getItem("imHere")) return;
   sessionStorage.setItem("imHere", "yes");
-  db.ref("presence/count").transaction(n => (n || 0) + 1);
+  db.ref("presence/count").transaction(function(n){
+    return (n || 0) + 1;
+  });
 }
 
-/* 去る */
-window.addEventListener("beforeunload", () => {
+/* ===== 去る ===== */
+window.addEventListener("beforeunload", function(){
   if (sessionStorage.getItem("imHere")) {
-    db.ref("presence/count").transaction(n => Math.max((n || 1) - 1, 0));
-    sessionStorage.removeItem("imHere");
+    db.ref("presence/count").transaction(function(n){
+      return Math.max((n || 1) - 1, 0);
+    });
   }
 });
 
-/* 人数を見て描く */
-db.ref("presence/count").on("value", snap => {
-  let num = snap.val() || 0;
-  let box = document.getElementById("dots");
+/* ===== 人数を見る ===== */
+db.ref("presence/count").on("value", function(snapshot){
+  var num = snapshot.val() || 0;
+  var box = document.getElementById("dots");
   box.innerHTML = "";
-
-  let mood = getNightMood();
-
-  for (let i = 0; i < num; i++) {
-    let d = document.createElement("div");
+  for (var i=0; i<num; i++) {
+    var d = document.createElement("div");
     d.className = "candle";
-    d.style.background =
-      `radial-gradient(circle at 50% 20%, #fff, ${mood.color})`;
-    d.style.animationDuration =
-      `${mood.speed}s, ${4 + Math.random()*2}s`;
-    d.style.animationDelay =
-      `${-Math.random()*mood.speed}s, 0s`;
-    d.style.opacity = 0.6 + Math.random()*0.4;
     box.appendChild(d);
   }
 });
 </script>
 
 <button onclick="imHere()">おる</button>
-
-<div id="dots"></div>
 
 </body>
 </html>
