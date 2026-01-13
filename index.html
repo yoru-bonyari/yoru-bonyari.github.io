@@ -85,37 +85,41 @@ var db = firebase.database();
 var myRef = db.ref("presence/users").push();
 
 function imHere() {
-  myRef.set(true);
+  var box = document.getElementById("dots");
+  var w = box.clientWidth;
+  var h = box.clientHeight;
+
+  var x = Math.random() * (w - 20);
+  var y = Math.random() * (h - 40);
+
+  myRef.set({
+    x: x,
+    y: y
+  });
+
   myRef.onDisconnect().remove();
 }
 
 /* ===== 人数を見る ===== */
 db.ref("presence/users").on("value", function(snapshot){
-  var num = snapshot.numChildren();
   var box = document.getElementById("dots");
   box.innerHTML = "";
 
-  var boxWidth = box.clientWidth;
-  var boxHeight = box.clientHeight;
+  snapshot.forEach(function(child){
+    var data = child.val();
 
-for (var i = 0; i < num; i++) {
-  var d = document.createElement("div");
-  d.className = "candle";
+    var d = document.createElement("div");
+    d.className = "candle";
 
-  // 場所を決める
-  var x = Math.random() * (boxWidth - 20);
-  var y = Math.random() * (boxHeight - 40);
+    d.style.left = data.x + "px";
+    d.style.top  = data.y + "px";
 
-  d.style.left = x + "px";
-  d.style.top  = y + "px";
+    d.style.animationDuration =
+      (1.5 + Math.random()) + "s, " +
+      (3 + Math.random()*2) + "s";
 
-  // 呼吸の個体差
-  d.style.animationDuration =
-    (1.5 + Math.random()) + "s, " +
-    (3 + Math.random()*2) + "s";
-
-  box.appendChild(d);
-}
+    box.appendChild(d);
+  });
 });
 
 </script>
