@@ -24,22 +24,10 @@ body {
   margin: 6px;
   border-radius: 50% 50% 60% 60%;
   background: radial-gradient(circle at 50% 20%, #fff, #ff9b5a);
+
   animation-name: flicker, breathe;
+  animation-duration: 2s, 4s;
   animation-iteration-count: infinite;
-}
-
-/* 揺れ */
-@keyframes flicker {
-  0%   { transform: scale(1) translateY(0); opacity: 0.9; }
-  50%  { transform: scale(0.9) translateY(1px); opacity: 0.7; }
-  100% { transform: scale(1) translateY(0); opacity: 0.9; }
-}
-
-/* 呼吸 */
-@keyframes breathe {
-  0%   { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
-  50%  { box-shadow: 0 0 14px rgba(255,180,80,0.9); }
-  100% { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
 }
 </style>
 
@@ -95,6 +83,12 @@ db.ref("presence/count").on("value", function(snapshot){
     box.appendChild(d);
   }
 });
+
+/* ===== 個体差 ===== */
+d.style.animationDuration =
+  (1.5 + Math.random()) + "s, " +
+  (3 + Math.random()*2) + "s";
+
 </script>
 
 <button onclick="imHere()">おる</button>
