@@ -24,11 +24,13 @@ button {
 }
 
 #dots {
+  position: relative;
   min-height: 40vh;
 }
 
 /* 蝋燭 */
 .candle {
+  position: absolute;
   display: inline-block;
   width: 3vw;
   height: 6vw;
@@ -93,16 +95,27 @@ db.ref("presence/users").on("value", function(snapshot){
   var box = document.getElementById("dots");
   box.innerHTML = "";
 
-  for (var i = 0; i < num; i++) {
-    var d = document.createElement("div");
-    d.className = "candle";
+  var boxWidth = box.clientWidth;
+  var boxHeight = box.clientHeight;
 
-    d.style.animationDuration =
-      (1.5 + Math.random()) + "s, " +
-      (3 + Math.random()*2) + "s";
+for (var i = 0; i < num; i++) {
+  var d = document.createElement("div");
+  d.className = "candle";
 
-    box.appendChild(d);
-  }
+  // 場所を決める
+  var x = Math.random() * (boxWidth - 20);
+  var y = Math.random() * (boxHeight - 40);
+
+  d.style.left = x + "px";
+  d.style.top  = y + "px";
+
+  // 呼吸の個体差
+  d.style.animationDuration =
+    (1.5 + Math.random()) + "s, " +
+    (3 + Math.random()*2) + "s";
+
+  box.appendChild(d);
+}
 });
 
 </script>
