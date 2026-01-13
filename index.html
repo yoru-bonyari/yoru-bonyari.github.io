@@ -91,13 +91,13 @@ function imHere() {
   var w = box.clientWidth;
   var h = box.clientHeight;
 
-  var x = Math.random() * (w - 20);
-  var y = Math.random() * (h - 40);
+  var xRate = Math.random(); // 0〜1
+  var yRate = Math.random();
 
-  myRef.set({
-    x: x,
-    y: y
-  });
+myRef.set({
+  x: xRate,
+  y: yRate
+});
 
   myRef.onDisconnect().remove();
 }
@@ -113,9 +113,11 @@ db.ref("presence/users").on("value", function(snapshot){
     var d = document.createElement("div");
     d.className = "candle";
 
-    d.style.left = data.x + "px";
-    d.style.top  = data.y + "px";
+    var boxW = box.clientWidth;
+    var boxH = box.clientHeight;
 
+    d.style.left = (data.x * boxW) + "px";
+    d.style.top  = (data.y * boxH) + "px";
     d.style.animationDuration =
       (1.5 + Math.random()) + "s, " +
       (3 + Math.random()*2) + "s";
