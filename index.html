@@ -88,15 +88,6 @@ function imHere() {
   myRef.onDisconnect().remove();
 }
 
-/* ===== 去る ===== */
-window.addEventListener("beforeunload", function(){
-  if (sessionStorage.getItem("imHere")) {
-    db.ref("presence/count").transaction(function(n){
-      return Math.max((n || 1) - 1, 0);
-    });
-  }
-});
-
 /* ===== 人数を見る ===== */
 db.ref("presence/users").on("value", function(snapshot){
   var num = snapshot.numChildren();
