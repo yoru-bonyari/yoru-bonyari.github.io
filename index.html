@@ -80,12 +80,12 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
 /* ===== おる ===== */
+var myId = Date.now() + "_" + Math.random();
+var myRef = db.ref("presence/users/" + myId);
+
 function imHere() {
-  if (sessionStorage.getItem("imHere")) return;
-  sessionStorage.setItem("imHere", "yes");
-  db.ref("presence/count").transaction(function(n){
-    return (n || 0) + 1;
-  });
+  myRef.set(true);
+  myRef.onDisconnect().remove();
 }
 
 /* ===== 去る ===== */
@@ -98,20 +98,21 @@ window.addEventListener("beforeunload", function(){
 });
 
 /* ===== 人数を見る ===== */
-db.ref("presence/count").on("value", function(snapshot){
-  var num = snapshot.val() || 0;
+db.ref("presence/users").on("value", function(snapshot){
+  var num = snapshot.numChildren();
   var box = document.getElementById("dots");
   box.innerHTML = "";
-for (var i=0; i<num; i++) {
-  var d = document.createElement("div");
-  d.className = "candle";
 
-  d.style.animationDuration =
-    (1.5 + Math.random()) + "s, " +
-    (3 + Math.random()*2) + "s";
+  for (var i = 0; i < num; i++) {
+    var d = document.createElement("div");
+    d.className = "candle";
 
-  box.appendChild(d);
-}
+    d.style.animationDuration =
+      (1.5 + Math.random()) + "s, " +
+      (3 + Math.random()*2) + "s";
+
+    box.appendChild(d);
+  }
 });
 
 </script>
