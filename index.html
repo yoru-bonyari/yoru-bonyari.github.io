@@ -51,6 +51,10 @@ body {
 <div id="dots"></div>
 
 <script type="module">
+
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
@@ -73,9 +77,6 @@ body {
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
-
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
 
 /* 夜の時間の気配 */
 function getNightMood() {
