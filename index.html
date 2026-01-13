@@ -64,12 +64,14 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
 /* ===== おる ===== */
-  function imHere() {
-  alert("おる押されたで");
+function imHere() {
+  if (sessionStorage.getItem("imHere")) return;
+  sessionStorage.setItem("imHere", "yes");
+  db.ref("presence/count").transaction(function(n){
+    return (n || 0) + 1;
+  });
 }
-
-
-
+  
 /* ===== 去る ===== */
 window.addEventListener("beforeunload", function(){
   if (sessionStorage.getItem("imHere")) {
