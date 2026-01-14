@@ -3,83 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>夜のあかり｜静かなオンライン居場所</title>
-<meta name="description" content="夜のあかりは、誰かが「おる」だけで灯る、会話のないオンライン居場所です。">
+<meta name="description" content="誰かが「おる」だけで灯る、会話のないオンライン居場所。静かな時間を共有します。">
+
+<!-- Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app-check.js"></script>
 
 <style>
-body { background-color:#0b0e1a; color:#ffd27d; font-size:28px; padding:20px; height:100vh; overflow:hidden; }
-button { font-size:1.2em; padding:0.6em 1.2em; }
-#dots { position:relative; width:100%; height:calc(100vh - 120px); }
-.candle {
-  position:absolute;
-  width:3vw; height:6vw; max-width:14px; max-height:28px;
-  border-radius:50% 50% 60% 60%;
-  background:radial-gradient(circle at 50% 20%, #fff, #ff9b5a);
-  animation-name:flicker,breathe;
-  animation-duration:2s,4s;
-  animation-iteration-count:infinite;
+body {
+  background-color: #0b0e1a;
+  color: #ffd27d;
+  font-size: 28px;
+  padding: 20px;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
 }
-@keyframes flicker {0%{transform:scale(1) translateY(0);opacity:0.9;}50%{transform:scale(0.9) translateY(1px);opacity:0.7;}100%{transform:scale(1) translateY(0);opacity:0.9;}}
-@keyframes breathe {0%{box-shadow:0 0 6px rgba(255,180,80,0.6);}50%{box-shadow:0 0 14px rgba(255,180,80,0.9);}100%{box-shadow:0 0 6px rgba(255,180,80,0.6);}}
+
+button {
+  font-size: 1.2em;
+  padding: 0.6em 1.2em;
+}
+
+#dots {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 120px);
+}
+
+/* 蝋燭 */
+.candle {
+  position: absolute;
+  width: 3vw;
+  height: 6vw;
+  max-width: 16px;
+  max-height: 32px;
+  border-radius: 50% 50% 60% 60%;
+  background: radial-gradient(circle at 50% 20%, #fff, #ff9b5a);
+  animation-name: flicker, breathe;
+  animation-iteration-count: infinite;
+}
+
+@keyframes flicker {
+  0%   { transform: scale(1) translateY(0); opacity: 0.9; }
+  50%  { transform: scale(0.9) translateY(1px); opacity: 0.7; }
+  100% { transform: scale(1) translateY(0); opacity: 0.9; }
+}
+
+@keyframes breathe {
+  0%   { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
+  50%  { box-shadow: 0 0 14px rgba(255,180,80,0.9); }
+  100% { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
+}
 </style>
+</head>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check.js";
+<body>
 
-// 🔹 Firebase 設定
-const firebaseConfig = {
-  apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
-  authDomain: "yoru-no-akari.firebaseapp.com",
-  databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
-  projectId: "yoru-no-akari",
-  storageBucket: "yoru-no-akari.firebasestorage.app",
-  messagingSenderId: "365296381564",
-  appId: "1:365296381564:web:3f990dfb5b29b25405e3f9"
+<div id="dots"></div>
+<button onclick="imHere()">おる</button>
+
+<script>
+/* ===== Firebase設定 ===== */
+var firebaseConfig = {
+    apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
+    authDomain: "yoru-no-akari.firebaseapp.com",
+    databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
+    projectId: "yoru-no-akari",
+    storageBucket: "yoru-no-akari.firebasestorage.app",
+    messagingSenderId: "365296381564",
+    appId: "1:365296381564:web:f23e3c3db11682f805e3f9"
 };
 
-// 🔹 Firebase 初期化
-const app = initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-// 🔹 App Check 初期化（先にやる）
-initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('6LeFA0osAAAAABNtnCJcE2KUoWzRtnHkr9J5WT1W'),
-  isTokenAutoRefreshEnabled: true
+/* ===== App Check ===== */
+// デバッグは外してOK（本番）
+firebase.appCheck().activate(
+  '6LeFA0osAAAAABNtnCJcE2KUoWzRtnHkr9J5WT1W',
+  true
+);
+
+var db = firebase.database();
+
+/* ===== App Check準備完了フラグ ===== */
+var appCheckReady = false;
+firebase.appCheck().onTokenChanged(function(){
+  appCheckReady = true;
 });
 
-// 🔹 DB 操作
-const db = getDatabase(app);
-const myRef = push(ref(db, "presence/users"));
+/* ===== 「おる」 ===== */
+function imHere() {
+  if (!appCheckReady) return;
 
-window.imHere = () => {
-  const box = document.getElementById("dots");
-  const x = Math.random();
-  const y = Math.random();
-  set(myRef, { x, y });
-  onDisconnect(myRef).remove();
-};
+  var box = document.getElementById("dots");
+  var x = Math.random();
+  var y = Math.random();
 
-// 🔹 人数表示
-const dotsBox = document.getElementById("dots");
-onValue(ref(db, "presence/users"), snapshot => {
-  dotsBox.innerHTML = "";
-  snapshot.forEach(child => {
-    const data = child.val();
-    const d = document.createElement("div");
+  var myRef = db.ref("presence/users").push();
+
+  myRef.set({
+    x: x,
+    y: y,
+    t: Date.now()
+  });
+
+  myRef.onDisconnect().remove();
+}
+
+/* ===== 表示 ===== */
+db.ref("presence/users").on("value", function(snapshot){
+  var box = document.getElementById("dots");
+  box.innerHTML = "";
+
+  var boxW = box.clientWidth;
+  var boxH = box.clientHeight;
+
+  snapshot.forEach(function(child){
+    var data = child.val();
+    if (!data) return;
+
+    var d = document.createElement("div");
     d.className = "candle";
-    const w = dotsBox.clientWidth;
-    const h = dotsBox.clientHeight;
-    d.style.left = (data.x * w) + "px";
-    d.style.top = (data.y * h) + "px";
-    d.style.animationDuration = (1.5 + Math.random()) + "s, " + (3 + Math.random()*2) + "s";
-    dotsBox.appendChild(d);
+
+    d.style.left = (data.x * boxW) + "px";
+    d.style.top  = (data.y * boxH) + "px";
+
+    d.style.animationDuration =
+      (1.5 + Math.random()) + "s, " +
+      (3 + Math.random()*2) + "s";
+
+    box.appendChild(d);
   });
 });
 </script>
-</head>
-<body>
-<div id="dots"></div>
-<button onclick="imHere()">おる</button>
+
 </body>
 </html>
