@@ -3,13 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>夜のあかり｜静かなオンライン居場所</title>
+<title>夜のあかり｜安全版</title>
 
-<meta name="description" content="夜のあかりは、誰かが「おる」だけで灯る、会話のないオンライン居場所です。静かな時間を共有します。">
+<meta name="description" content="夜のあかりは、誰かが「おる」だけで灯る、会話のないオンライン居場所です。">
 
-<!-- Firebase v8 -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<!-- Firebase v9 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check.js";
+
+  // Firebase 設定
+  const firebaseConfig = {
+    apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
+    authDomain: "yoru-no-akari.firebaseapp.com",
+    databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
+    projectId: "yoru-no-akari",
+    storageBucket: "yoru-no-akari.firebasestorage.app",
+    messagingSenderId: "365296381564",
+    appId: "1:365296381564:web:3f990dfb5b29b25405e3f9"
+  };
+
+  // Firebase 初期化
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // App Check 初期化
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6Led9kksAAAAAMKJW3q4xetIFUF2UqfvHhcYLYK5'),
+    isTokenAutoRefreshEnabled: true
+  });
+
+  // おる用
+  const myRef = push(ref(db, "presence/users"));
+
+  window.imHere = function() {
+    const box = document.getElementById("dots");
+    const w = box.clientWidth;
+    const h = box.clientHeight;
+
+    const xRate = Math.random();
+    const yRate = Math.random();
+
+    set(myRef, { x: xRate, y: yRate });
+    onDisconnect(myRef).remove();
+  };
+
+  // 人数を見る
+  const dotsBox = document.getElementById("dots");
+  onValue(ref(db, "presence/users"), (snapshot) => {
+    dotsBox.innerHTML = "";
+    snapshot.forEach((child) => {
+      const data = child.val();
+      const d = document.createElement("div");
+      d.className = "candle";
+
+      const boxW = dotsBox.clientWidth;
+      const boxH = dotsBox.clientHeight;
+
+      d.style.left = (data.x * boxW) + "px";
+      d.style.top  = (data.y * boxH) + "px";
+      d.style.animationDuration =
+        (1.5 + Math.random()) + "s, " +
+        (3 + Math.random()*2) + "s";
+
+      dotsBox.appendChild(d);
+    });
+  });
+</script>
 
 <style>
 body {
@@ -32,15 +93,12 @@ button {
   height: calc(100vh - 120px);
 }
 
-/* 蝋燭 */
 .candle {
   position: absolute;
-  display: inline-block;
   width: 3vw;
   height: 6vw;
   max-width: 14px;
   max-height: 28px;
-  margin: 6px;
   border-radius: 50% 50% 60% 60%;
   background: radial-gradient(circle at 50% 20%, #fff, #ff9b5a);
   animation-name: flicker, breathe;
@@ -59,76 +117,12 @@ button {
   50%  { box-shadow: 0 0 14px rgba(255,180,80,0.9); }
   100% { box-shadow: 0 0 6px rgba(255,180,80,0.6); }
 }
-
 </style>
 
 </head>
-
 <body>
 
 <div id="dots"></div>
-
-<script>
-/* ===== Firebase設定（必ず自分のに置き換え） ===== */
-var firebaseConfig = {
-  apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
-  authDomain: "yoru-no-akari.firebaseapp.com",
-  databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
-  projectId: "yoru-no-akari",
-  storageBucket: "yoru-no-akari.firebasestorage.app",
-  messagingSenderId: "365296381564",
-  appId: "1:365296381564:web:3f990dfb5b29b25405e3f9",
-};
-
-/* ===== 初期化 ===== */
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
-
-/* ===== おる ===== */
-var myRef = db.ref("presence/users").push();
-
-function imHere() {
-  var box = document.getElementById("dots");
-  var w = box.clientWidth;
-  var h = box.clientHeight;
-
-  var xRate = Math.random(); // 0〜1
-  var yRate = Math.random();
-
-myRef.set({
-  x: xRate,
-  y: yRate
-});
-
-  myRef.onDisconnect().remove();
-}
-
-/* ===== 人数を見る ===== */
-db.ref("presence/users").on("value", function(snapshot){
-  var box = document.getElementById("dots");
-  box.innerHTML = "";
-
-  snapshot.forEach(function(child){
-    var data = child.val();
-
-    var d = document.createElement("div");
-    d.className = "candle";
-
-    var boxW = box.clientWidth;
-    var boxH = box.clientHeight;
-
-    d.style.left = (data.x * boxW) + "px";
-    d.style.top  = (data.y * boxH) + "px";
-    d.style.animationDuration =
-      (1.5 + Math.random()) + "s, " +
-      (3 + Math.random()*2) + "s";
-
-    box.appendChild(d);
-  });
-});
-
-</script>
-
 <button onclick="imHere()">おる</button>
 
 </body>
