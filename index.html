@@ -82,7 +82,7 @@ var firebaseConfig = {
 
 /* ===== 初期化 ===== */
 firebase.initializeApp(firebaseConfig);
-  var db = firebase.database();
+var db = firebase.database();
 
 /* ===== おる ===== */
 var myRef = db.ref("presence/users").push();
