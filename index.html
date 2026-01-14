@@ -69,7 +69,7 @@ button {
 <div id="dots"></div>
 
 <script>
-/* ===== Firebase設定 ===== */
+/* ===== Firebase設定（必ず自分のに置き換え） ===== */
 var firebaseConfig = {
   apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
   authDomain: "yoru-no-akari.firebaseapp.com",
@@ -82,7 +82,15 @@ var firebaseConfig = {
 
 /* ===== 初期化 ===== */
 firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
+
+  // App Check の初期化
+  const appCheck = firebase.appCheck();
+  appCheck.activate(
+    '6Led9kksAAAAAMKJW3q4xetIFUF2UqfvHhcYLYK5',
+    false
+  );
+
+  var db = firebase.database();
 
 /* ===== おる ===== */
 var myRef = db.ref("presence/users").push();
