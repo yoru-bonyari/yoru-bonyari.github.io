@@ -114,6 +114,11 @@ function imHere() {
 
   myRef.onDisconnect().remove();
 
+  // ボタンを無効化（何度押しても増えん）
+  var btn = document.getElementById("hereBtn");
+  btn.disabled = true;
+}
+
 /* ===== 表示 ===== */
 db.ref("presence/users").on("value", function(snapshot){
   var box = document.getElementById("dots");
