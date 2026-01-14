@@ -99,24 +99,20 @@ var myRef = null;
 
 /* ===== 「おる」 ===== */
 function imHere() {
-  if (myRef) return;            // もうおる
-  if (!appCheckReady) return;   // まだ準備中
+  if (!appCheckReady) return;
 
-  var box = document.getElementById("dots");
+  // まだ灯りが無いときだけ作る
+  if (!myRef) {
+    myRef = db.ref("presence/users").push();
+    myRef.onDisconnect().remove();
+  }
 
-  myRef = db.ref("presence/users").push();
-
+  // 押すたびに位置を更新する
   myRef.set({
     x: Math.random(),
     y: Math.random(),
     t: Date.now()
   });
-
-  myRef.onDisconnect().remove();
-
-  // ボタンを無効化（何度押しても増えん）
-  var btn = document.getElementById("hereBtn");
-  btn.disabled = true;
 }
 
 /* ===== 表示 ===== */
