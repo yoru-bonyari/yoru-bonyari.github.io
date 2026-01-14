@@ -64,7 +64,7 @@ button {
 <body>
 
 <div id="dots"></div>
-<button onclick="imHere()">おる</button>
+<button id="hereBtn" onclick="imHere()">おる</button>
 
 <script>
 /* ===== Firebase設定 ===== */
@@ -81,37 +81,42 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 /* ===== App Check ===== */
-// デバッグは外してOK（本番）
 firebase.appCheck().activate(
-  '6LeFA0osAAAAABNtnCJcE2KUoWzRtnHkr9J5WT1W',
-  false
+  "6LeFA0osAAAAABNtnCJcE2KUoWzRtnHkr9J5WT1W",
+  false   // ← 本番。灯らん時だけ true にして様子見る
 );
 
 var db = firebase.database();
 
 /* ===== App Check準備完了フラグ ===== */
 var appCheckReady = false;
-firebase.appCheck().onTokenChanged(function(){
+firebase.appCheck().onTokenChanged(function () {
   appCheckReady = true;
 });
 
+/* ===== 自分用の灯り ===== */
+var myRef = null;
+
 /* ===== 「おる」 ===== */
 function imHere() {
-  if (!appCheckReady) return;
+  if (myRef) return;            // もうおる
+  if (!appCheckReady) return;   // まだ準備中
 
   var box = document.getElementById("dots");
-  var x = Math.random();
-  var y = Math.random();
 
-  var myRef = db.ref("presence/users").push();
+  myRef = db.ref("presence/users").push();
 
   myRef.set({
-    x: x,
-    y: y,
+    x: Math.random(),
+    y: Math.random(),
     t: Date.now()
   });
 
   myRef.onDisconnect().remove();
+
+  // ボタンを無効化（何度押しても増えん）
+  var btn = document.getElementById("hereBtn");
+  btn.disabled = true;
 }
 
 /* ===== 表示 ===== */
@@ -134,7 +139,7 @@ db.ref("presence/users").on("value", function(snapshot){
 
     d.style.animationDuration =
       (1.5 + Math.random()) + "s, " +
-      (3 + Math.random()*2) + "s";
+      (3 + Math.random() * 2) + "s";
 
     box.appendChild(d);
   });
