@@ -17,10 +17,18 @@ body {
   background-color: #0b0e1a;
   color: #ffd27d;
   font-size: 28px;
-  padding: 20px;
   margin: 0;
+  padding: 20px;
   height: 100vh;
   overflow: hidden;
+}
+
+#dots {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 80px; /* ボタン分 */
 }
 
 button {
@@ -31,12 +39,6 @@ button {
   font-size: 1.2em;
   padding: 0.6em 1.2em;
   z-index: 10;
-}
-
-#dots {
-  position: relative;
-  width: 100%;
-  height: calc(100vh - 80px);
 }
 
 /* 蝋燭 */
@@ -69,54 +71,46 @@ button {
 <body>
 
 <div id="dots"></div>
-<button id="hereBtn" onclick="imHere()">おる</button>
+<button onclick="imHere()">おる</button>
 
 <script>
-/* ===== Firebase設定 ===== */
-var firebaseConfig = {
-    apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
-    authDomain: "yoru-no-akari.firebaseapp.com",
-    databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
-    projectId: "yoru-no-akari",
-    storageBucket: "yoru-no-akari.firebasestorage.app",
-    messagingSenderId: "365296381564",
-    appId: "1:365296381564:web:f23e3c3db11682f805e3f9"
-};
-
-firebase.initializeApp(firebaseConfig);
+/* ===== Firebase ===== */
+firebase.initializeApp({
+  apiKey: "AIzaSyCGl6i7ca_9tBrLTjR9bjqJSxkcKOFNoDo",
+  authDomain: "yoru-no-akari.firebaseapp.com",
+  databaseURL: "https://yoru-no-akari-default-rtdb.firebaseio.com",
+  projectId: "yoru-no-akari",
+  storageBucket: "yoru-no-akari.firebasestorage.app",
+  messagingSenderId: "365296381564",
+  appId: "1:365296381564:web:f23e3c3db11682f805e3f9"
+});
 
 /* ===== App Check ===== */
 firebase.appCheck().activate(
   "6LeFA0osAAAAABNtnCJcE2KUoWzRtnHkr9J5WT1W",
-  false   // ← 本番。灯らん時だけ true にして様子見る
+  false
 );
 
 var db = firebase.database();
-
-/* ===== App Check準備完了フラグ ===== */
 var appCheckReady = false;
-firebase.appCheck().onTokenChanged(function () {
-  appCheckReady = true;
-});
+firebase.appCheck().onTokenChanged(() => appCheckReady = true);
 
-/* ===== 自分用の灯り ===== */
+/* ===== 自分の灯り ===== */
 var myRef = null;
 
-/* ===== 「おる」 ===== */
+/* ===== おる ===== */
 function imHere() {
   if (!appCheckReady) return;
 
-  // まだ灯りが無いときだけ作る
   if (!myRef) {
     myRef = db.ref("presence/users").push();
     myRef.onDisconnect().remove();
   }
 
-  // 押すたびに位置を更新する
   myRef.set({
     x: Math.random(),
     y: Math.random(),
-    t: Date.now()
+    lastActive: Date.now()
   });
 }
 
@@ -126,17 +120,21 @@ db.ref("presence/users").on("value", function(snapshot){
   box.innerHTML = "";
 
   var boxW = box.clientWidth;
-  var boxH = box.clientHeight;
+  var boxH = window.innerHeight - 100; // ← 固定で引く
+  var now = Date.now();
 
   snapshot.forEach(function(child){
     var data = child.val();
     if (!data) return;
 
+    if (now - data.lastActive > 30000) return; // 👻成仏
+
     var d = document.createElement("div");
     d.className = "candle";
 
+    var safeY = data.y * 0.9;
     d.style.left = (data.x * boxW) + "px";
-    d.style.top  = (data.y * boxH) + "px";
+    d.style.top  = (safeY * boxH) + "px";
 
     d.style.animationDuration =
       (1.5 + Math.random()) + "s, " +
