@@ -107,11 +107,11 @@ function imHere() {
     myRef.onDisconnect().remove();
   }
 
-  myRef.set({
-    x: Math.random(),
-    y: Math.random(),
-    lastActive: Date.now()
-  });
+myRef.set({
+  x: 0.1 + Math.random() * 0.8,
+  y: 0.1 + Math.random() * 0.8,
+  lastActive: Date.now()
+});
 }
 
 /* ===== 表示 ===== */
@@ -127,14 +127,16 @@ db.ref("presence/users").on("value", function(snapshot){
     var data = child.val();
     if (!data) return;
 
-    if (now - data.lastActive > 300000) return; // 👻成仏
+    if (now - data.lastActive > 30000) return; // 👻成仏
 
     var d = document.createElement("div");
     d.className = "candle";
 
-    var safeY = data.y * 0.9;
-    d.style.left = (data.x * boxW) + "px";
-    d.style.top  = (safeY * boxH) + "px";
+var x = Math.min(Math.max(data.x, 0.05), 0.95);
+var y = Math.min(Math.max(data.y, 0.05), 0.95);
+
+d.style.left = (x * boxW) + "px";
+d.style.top  = (y * boxH) + "px";
 
     d.style.animationDuration =
       (1.5 + Math.random()) + "s, " +
