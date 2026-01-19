@@ -127,7 +127,7 @@ db.ref("presence/users").on("value", function(snapshot){
     var data = child.val();
     if (!data) return;
 
-    if (now - data.lastActive > 30000) return; // 👻成仏
+    if (now - data.lastActive > 300000) return; // 👻成仏
 
     var d = document.createElement("div");
     d.className = "candle";
