@@ -24,9 +24,11 @@ body {
 }
 
 #dots {
-  position: relative;
-  width: 100%;
-  height: calc(100vh - 80px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 80px; /* ボタン分 */
 }
 
 button {
@@ -118,7 +120,7 @@ db.ref("presence/users").on("value", function(snapshot){
   box.innerHTML = "";
 
   var boxW = box.clientWidth;
-  var boxH = box.clientHeight;
+  var boxH = window.innerHeight - 100; // ← 固定で引く
   var now = Date.now();
 
   snapshot.forEach(function(child){
